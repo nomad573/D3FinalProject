@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Programming Languages Genealogy Tree - Interactive Visualization</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .tree-container {
+            width: 100%;
+            height: 900px;
+            border: 2px solid #ecf0f1;
+            border-radius: 10px;
+            overflow: hidden;
+            background: linear-gradient(45deg, #f8f9fa 0%, #ffffff 100%);
+            position: relative;
+        }
+        
+        .controls {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .control-button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 0 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        
+        .control-button:hover {
+            background: #2980b9;
+        }
+        
+        .node circle {
+            cursor: pointer;
+            stroke-width: 3px;
+            transition: all 0.3s ease;
+        }
+        
+        .node circle:hover {
+            stroke-width: 4px;
+            filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.3));
+        }
+        
+        .node text {
+            font: 12px 'Segoe UI', sans-serif;
+            text-anchor: middle;
+            dominant-baseline: middle;
+            pointer-events: none;
+            font-weight: 600;
+        }
+        
+        .node .year-label {
+            font: 10px 'Segoe UI', sans-serif;
+            fill: #7f8c8d;
+            font-weight: 400;
+        }
+        
+        .link {
+            fill: none;
+            stroke-opacity: 0.7;
+            stroke-width: 2.5px;
+            transition: all 0.3s ease;
+        }
+        
+        .link:hover {
+            stroke-opacity: 1;
+            stroke-width: 4px;
+        }
+        
+        .tooltip {
+            position: absolute;
+            padding: 15px;
+            background: rgba(44, 62, 80, 0.95);
+            color: white;
+            border-radius: 8px;
+            font-size: 13px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            max-width: 300px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+        
+        .tooltip h4 {
+            margin: 0 0 8px 0;
+            color: #3498db;
+            font-size: 16px;
+        }
+        
+        .tooltip .year {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .tooltip .era {
+            color: #f39c12;
+            font-style: italic;
+        }
+        
+        .legend {
+            margin-top: 25px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 10px;
+            border-left: 5px solid #3498db;
+        }
+        
+        .legend h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+            border: 2px solid #2c3e50;
+        }
+        
+        .era-first { fill: #e74c3c; }
+        .era-second { fill: #f39c12; }
+        .era-third { fill: #f1c40f; }
+        .era-fourth { fill: #27ae60; }
+        .era-modern { fill: #3498db; }
+        
+        .zoom-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .zoom-btn {
+            width: 40px;
+            height: 40px;
+            background: rgba(52, 152, 219, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        .zoom-btn:hover {
+            background: rgba(41, 128, 185, 1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Programming Languages Genealogy Tree</h1>
+        <p class="subtitle">Interactive visualization of programming language evolution from 1940 to present</p>
+        
+        <div class="controls">
+            <button class="control-button" onclick="expandAll()">Expand All</button>
+            <button class="control-button" onclick="collapseAll()">Collapse All</button>
+            <button class="control-button" onclick="resetView()">Reset View</button>
+            <button class="control-button" onclick="toggleAnimation()">Toggle Animation</button>
+        </div>
+        
+        <div class="tree-container" id="tree">
+            <div class="zoom-controls">
+                <button class="zoom-btn" onclick="zoomIn()">+</button>
+                <button class="zoom-btn" onclick="zoomOut()">−</button>
+                <button class="zoom-btn" onclick="resetView()">⌂</button>
+            </div>
+        </div>
+        
+        <div class="legend">
+            <h3>Programming Language Eras & Features</h3>
+            <div class="legend-grid">
+                <div class="legend-item">
+                    <span class="legend-color era-first"></span>
+                    <span><strong>1st Gen (1940s):</strong> Machine Language</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color era-second"></span>
+                    <span><strong>2nd Gen (1940s-50s):</strong> Assembly Languages</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color era-third"></span>
+                    <span><strong>3rd Gen (1950s-70s):</strong> High-level Languages</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color era-fourth"></span>
+                    <span><strong>4th Gen (1980s-90s):</strong> Specialized Languages</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color era-modern"></span>
+                    <span><strong>Modern (2000s+):</strong> Contemporary Languages</span>
+                </div>
+            </div>
+            <p><strong>Interaction Guide:</strong> Hover over nodes for detailed information • Click nodes to expand/collapse • Use zoom controls • Drag to pan around the tree</p>
+        </div>
+    </div>
+    
+    <div class="tooltip" id="tooltip"></div>
+
+    <script src="language_data.js"></script>
+    <script>
+        // Configuration
+        const margin = {top: 40, right: 120, bottom: 40, left: 120};
+        const width = 1340 - margin.left - margin.right;
+        const height = 860 - margin.top - margin.bottom;
+        
+        let animationEnabled = true;
+        let root;
+        let treeLayout;
+        let svg, g, zoom;
+
+        // Color mapping for different eras
+        const eraColors = {
+            "First Generation": "#e74c3c",
+            "Second Generation": "#f39c12", 
+            "Third Generation": "#f1c40f",
+            "Fourth Generation": "#27ae60",
+            "Modern": "#3498db"
+        };
+
+        // Initialize visualization
+        function initVisualization() {
+            // Create SVG
+            svg = d3.select("#tree")
+                .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom);
+
+            // Create main group
+            g = svg.append("g")
+                .attr("transform", `translate(${margin.left},${margin.top})`);
+
+            // Setup zoom
+            zoom = d3.zoom()
+                .scaleExtent([0.3, 3])
+                .on("zoom", handleZoom);
+
+            svg.call(zoom);
+
+            // Create tree layout
+            treeLayout = d3.tree()
+                .size([height, width])
+                .separation((a, b) => (a.parent === b.parent ? 1 : 2) / a.depth);
+
+            // Process data
+            root = d3.hierarchy(programmingLanguagesData);
+            root.descendants().forEach((d, i) => {
+                d.id = i;
+                d._children = d.children;
+                if (d.depth && d.data.name) d.children = null;
+            });
+
+            update(root);
+        }
+
+        function handleZoom(event) {
+            g.attr("transform", event.transform);
+        }
+
+        function update(source) {
+            const duration = animationEnabled ? 750 : 0;
+            
+            // Compute new tree layout
+            treeLayout(root);
+
+            const nodes = root.descendants().reverse();
+            const links = root.links();
+
+            // Normalize for fixed-depth
+            nodes.forEach(d => { d.y = d.depth * 200; });
+
+            // Update nodes
+            const node = g.selectAll('g.node')
+                .data(nodes, d => d.id || (d.id = ++i));
+
+            // Enter new nodes
+            const nodeEnter = node.enter().append('g')
+                .attr('class', 'node')
+                .attr("transform", d => `translate(${source.y0 || 0},${source.x0 || 0})`)
+                .on('click', click)
+                .on('mouseover', showTooltip)
+                .on('mouseout', hideTooltip);
+
+            nodeEnter.append('circle')
+                .attr('r', 1e-6)
+                .style("fill", d => d._children ? getNodeColor(d) : "#fff")
+                .style("stroke", d => getNodeColor(d));
+
+            nodeEnter.append('text')
+                .attr("dy", "-1.2em")
+                .attr("text-anchor", "middle")
+                .text(d => d.data.name)
+                .style("fill-opacity", 1e-6);
+
+            nodeEnter.append('text')
+                .attr("dy", "2em")
+                .attr("text-anchor", "middle")
+                .attr("class", "year-label")
+                .text(d => `(${d.data.year})`)
+                .style("fill-opacity", 1e-6);
+
+            // Update existing nodes
+            const nodeUpdate = nodeEnter.merge(node);
+
+            nodeUpdate.transition()
+                .duration(duration)
+                .attr("transform", d => `translate(${d.y},${d.x})`);
+
+            nodeUpdate.select('circle')
+                .transition()
+                .duration(duration)
+                .attr('r', 10)
+                .style("fill", d => d._children ? getNodeColor(d) : "#fff")
+                .style("stroke", d => getNodeColor(d));
+
+            nodeUpdate.selectAll('text')
+                .transition()
+                .duration(duration)
+                .style("fill-opacity", 1);
+
+            // Remove exiting nodes
+            const nodeExit = node.exit().transition()
+                .duration(duration)
+                .attr("transform", d => `translate(${source.y},${source.x})`)
+                .remove();
+
+            nodeExit.select('circle')
+                .attr('r', 1e-6);
+
+            nodeExit.selectAll('text')
+                .style('fill-opacity', 1e-6);
+
+            // Update links
+            const link = g.selectAll('path.link')
+                .data(links, d => d.target.id);
+
+            const linkEnter = link.enter().insert('path', "g")
+                .attr("class", "link")
+                .attr('d', d => {
+                    const o = {x: source.x0 || 0, y: source.y0 || 0};
+                    return diagonal(o, o);
+                })
+                .style("stroke", d => getNodeColor(d.target));
+
+            const linkUpdate = linkEnter.merge(link);
+
+            linkUpdate.transition()
+                .duration(duration)
+                .attr('d', d => diagonal(d.source, d.target))
+                .style("stroke", d => getNodeColor(d.target));
+
+            const linkExit = link.exit().transition()
+                .duration(duration)
+                .attr('d', d => {
+                    const o = {x: source.x, y: source.y};
+                    return diagonal(o, o);
+                })
+                .remove();
+
+            // Store old positions for transition
+            nodes.forEach(d => {
+                d.x0 = d.x;
+                d.y0 = d.y;
+            });
+        }
+
+        function diagonal(s, d) {
+            const path = `M ${s.y} ${s.x}
+                         C ${(s.y + d.y) / 2} ${s.x},
+                           ${(s.y + d.y) / 2} ${d.x},
+                           ${d.y} ${d.x}`;
+            return path;
+        }
+
+        function getNodeColor(d) {
+            return eraColors[d.data.era] || "#95a5a6";
+        }
+
+        function click(event, d) {
+            if (d.children) {
+                d._children = d.children;
+                d.children = null;
+            } else {
+                d.children = d._children;
+                d._children = null;
+            }
+            update(d);
+        }
+
+        function showTooltip(event, d) {
+            const tooltip = d3.select("#tooltip");
+            tooltip.transition()
+                .duration(200)
+                .style("opacity", 1);
+            
+            tooltip.html(`
+                <h4>${d.data.name}</h4>
+                <p><strong>Year:</strong> <span class="year">${d.data.year}</span></p>
+                <p><strong>Era:</strong> <span class="era">${d.data.era}</span></p>
+                <p><strong>Description:</strong> ${d.data.description}</p>
+                <p><strong>Genealogy:</strong> ${d.data.genealogy}</p>
+                ${d._children ? '<p><em>Click to expand children</em></p>' : ''}
+                ${d.children ? '<p><em>Click to collapse children</em></p>' : ''}
+            `)
+                .style("left", (event.pageX + 15) + "px")
+                .style("top", (event.pageY - 10) + "px");
+        }
+
+        function hideTooltip() {
+            d3.select("#tooltip").transition()
+                .duration(300)
+                .style("opacity", 0);
+        }
+
+        // Control functions
+        function expandAll() {
+            function expand(d) {
+                if (d._children) {
+                    d.children = d._children;
+                    d._children = null;
+                }
+                if (d.children) d.children.forEach(expand);
+            }
+            expand(root);
+            update(root);
+        }
+
+        function collapseAll() {
+            function collapse(d) {
+                if (d.children) {
+                    d._children = d.children;
+                    d.children = null;
+                    d._children.forEach(collapse);
+                }
+            }
+            root.children.forEach(collapse);
+            update(root);
+        }
+
+        function resetView() {
+            svg.transition().duration(750).call(
+                zoom.transform,
+                d3.zoomIdentity.translate(margin.left, margin.top)
+            );
+        }
+
+        function zoomIn() {
+            svg.transition().duration(300).call(
+                zoom.scaleBy, 1.5
+            );
+        }
+
+        function zoomOut() {
+            svg.transition().duration(300).call(
+                zoom.scaleBy, 0.67
+            );
+        }
+
+        function toggleAnimation() {
+            animationEnabled = !animationEnabled;
+            document.querySelector('button[onclick="toggleAnimation()"]').textContent = 
+                animationEnabled ? 'Disable Animation' : 'Enable Animation';
+        }
+
+        // Initialize when page loads
+        let i = 0;
+        document.addEventListener('DOMContentLoaded', initVisualization);
+    </script>
+</body>
+</html>
