@@ -132,7 +132,29 @@
             display: block;
         }
 
-        /* Featured Project */
+        /* Projects Grid */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .project-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-radius: 10px;
+            padding: 30px;
+            border-left: 5px solid #667eea;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Featured Project - Keep for compatibility */
         .featured-project {
             background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
             border-radius: 10px;
@@ -316,6 +338,15 @@
                 padding: 20px;
             }
 
+            .projects-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .project-card {
+                padding: 20px;
+            }
+
             .project-header {
                 flex-direction: column;
                 text-align: center;
@@ -372,69 +403,99 @@
             <div class="tab-content">
                 <!-- Projects Tab -->
                 <div id="projects" class="tab-pane active">
-                    <div class="featured-project">
-                        <div class="project-header">
-                            <div class="project-icon">
-                                <i class="fas fa-sitemap"></i>
-                            </div>
-                            <div>
-                                <h2 class="project-title">Programming Languages Genealogy Tree</h2>
-                                <p class="project-tech">D3.js v7 • Interactive Visualization • Data Analysis</p>
-                            </div>
-                        </div>
-                        
-                        <div class="project-description">
-                            An interactive tree visualization showing the evolution and genealogy of programming languages 
-                            from machine language (1940) to modern languages (2020s). Built with D3.js v7, this 
-                            comprehensive visualization displays over 40 important programming languages and their 
-                            influence relationships across multiple generations.
-                        </div>
-
-                        <div class="project-features">
-                            <div class="feature">
-                                <i class="fas fa-check-circle feature-icon"></i>
-                                <strong>Interactive Tree Layout:</strong> Expandable/collapsible nodes with smooth animations
-                            </div>
-                            <div class="feature">
-                                <i class="fas fa-check-circle feature-icon"></i>
-                                <strong>Historical Timeline:</strong> Languages from 1940s machine code to 2020s modern languages
-                            </div>
-                            <div class="feature">
-                                <i class="fas fa-check-circle feature-icon"></i>
-                                <strong>Genealogy Connections:</strong> Visual representation of language influence chains
-                            </div>
-                            <div class="feature">
-                                <i class="fas fa-check-circle feature-icon"></i>
-                                <strong>Rich Tooltips:</strong> Detailed information on hover including years, descriptions, and genealogy
-                            </div>
-                            <div class="feature">
-                                <i class="fas fa-check-circle feature-icon"></i>
-                                <strong>Era Color-Coding:</strong> Visual distinction between programming language generations
-                            </div>
-                            <div class="feature">
-                                <i class="fas fa-check-circle feature-icon"></i>
-                                <strong>Zoom & Pan:</strong> Interactive navigation with zoom controls and drag functionality
-                            </div>
-                        </div>
-
-                        <div class="project-links">
-                            <a href="D3FinalProject/enhanced_language_tree.html" class="btn btn-primary">
-                                <i class="fas fa-eye"></i> View Interactive Demo
-                            </a>
-                            <a href="D3FinalProject/programming_languages_tree.html" class="btn btn-secondary">
-                                <i class="fas fa-tree"></i> Basic Version
-                            </a>
-                            <a href="https://github.com/nomad573/D3FinalProject" class="btn btn-outline">
-                                <i class="fab fa-github"></i> Source Code
-                            </a>
-                        </div>
+                    <div style="text-align: center; margin-bottom: 40px;">
+                        <h2 style="color: #2c3e50; margin-bottom: 10px;">Portfolio Projects</h2>
+                        <p style="color: #7f8c8d; font-size: 1.1em;">Interactive Data Visualizations & Programming Projects</p>
                     </div>
 
-                    <div style="text-align: center; padding: 40px 0; color: #6c757d;">
-                        <i class="fas fa-tools" style="font-size: 3em; margin-bottom: 20px;"></i>
-                        <h3>More Projects Coming Soon</h3>
-                        <p>I'm continuously working on new data visualization and programming projects.<br>
-                        Check back regularly or follow me on GitHub for updates!</p>
+                    <!-- Projects Grid -->
+                    <div class="projects-grid">
+                        <!-- Programming Languages Tree Project -->
+                        <div class="project-card">
+                            <div class="project-header">
+                                <div class="project-icon">
+                                    <i class="fas fa-sitemap"></i>
+                                </div>
+                                <div>
+                                    <h3 class="project-title">Programming Languages Tree</h3>
+                                    <p class="project-tech">D3.js v7 • Interactive Visualization • Data Analysis</p>
+                                </div>
+                            </div>
+                            
+                            <div class="project-description">
+                                An interactive tree visualization showing the evolution and genealogy of programming languages 
+                                from machine language (1940) to modern languages (2020s). Features expandable nodes, 
+                                zoom controls, and rich historical data.
+                            </div>
+
+                            <div class="project-links">
+                                <a href="enhanced_language_tree.html" class="btn btn-primary">
+                                    <i class="fas fa-eye"></i> View Project
+                                </a>
+                                <a href="programming_languages_tree.html" class="btn btn-secondary">
+                                    <i class="fas fa-tree"></i> Basic Version
+                                </a>
+                                <a href="https://github.com/nomad573/D3FinalProject" class="btn btn-outline">
+                                    <i class="fab fa-github"></i> Source
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Scatterplot Project -->
+                        <div class="project-card">
+                            <div class="project-header">
+                                <div class="project-icon">
+                                    <i class="fas fa-chart-scatter"></i>
+                                </div>
+                                <div>
+                                    <h3 class="project-title">Interactive Scatterplot</h3>
+                                    <p class="project-tech">D3.js • Data Visualization • Statistical Analysis</p>
+                                </div>
+                            </div>
+                            
+                            <div class="project-description">
+                                A comprehensive scatterplot visualization with interactive features for data exploration 
+                                and analysis. Includes filtering, brushing, zooming, and detailed tooltips for 
+                                multi-dimensional data insights.
+                            </div>
+
+                            <div class="project-links">
+                                <a href="https://nomad573.github.io/Visualization_Work_Files/" target="_blank" class="btn btn-primary">
+                                    <i class="fas fa-external-link-alt"></i> View Project
+                                </a>
+                                <a href="https://github.com/nomad573/Visualization_Work_Files" target="_blank" class="btn btn-outline">
+                                    <i class="fab fa-github"></i> Source
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- GeoMapping Project -->
+                        <div class="project-card">
+                            <div class="project-header">
+                                <div class="project-icon">
+                                    <i class="fas fa-globe-americas"></i>
+                                </div>
+                                <div>
+                                    <h3 class="project-title">Geographic Data Mapping</h3>
+                                    <p class="project-tech">D3.js • GeoJSON • Cartographic Visualization</p>
+                                </div>
+                            </div>
+                            
+                            <div class="project-description">
+                                Interactive geographic data visualization featuring choropleth maps, coordinate plotting, 
+                                and spatial analysis tools. Includes projection transformations, zoom functionality, 
+                                and dynamic data overlays.
+                            </div>
+
+                            <div class="project-links">
+                                <a href="https://nomad573.github.io/GeoMapping/" target="_blank" class="btn btn-primary">
+                                    <i class="fas fa-external-link-alt"></i> View Project
+                                </a>
+                                <a href="https://github.com/nomad573/GeoMapping" target="_blank" class="btn btn-outline">
+                                    <i class="fab fa-github"></i> Source
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
